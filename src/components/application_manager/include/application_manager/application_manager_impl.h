@@ -53,6 +53,7 @@
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/event_engine/event_dispatcher_impl.h"
 #include "application_manager/hmi_interfaces_impl.h"
+#include "application_manager/command_holder_impl.h"
 
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
@@ -352,6 +353,13 @@ class ApplicationManagerImpl
       mobile_apis::VehicleDataType::eType vehicle_info, int value) OVERRIDE;
 
   void OnApplicationRegistered(ApplicationSharedPtr app) OVERRIDE;
+
+  /**
+   * @brief OnApplicationSwitched starts processing of commands collected
+   * during device switching process
+   * @param app Application
+   */
+  void OnApplicationSwitched(ApplicationSharedPtr app) OVERRIDE;
 
   HMICapabilities& hmi_capabilities() OVERRIDE;
   const HMICapabilities& hmi_capabilities() const OVERRIDE;
@@ -1712,6 +1720,8 @@ class ApplicationManagerImpl
   uint32_t apps_size_;
 
   volatile bool is_stopping_;
+
+  CommandHolderImpl commands_holder_;
 
 #ifdef BUILD_TESTS
  public:
