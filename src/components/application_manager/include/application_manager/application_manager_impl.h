@@ -422,7 +422,10 @@ class ApplicationManagerImpl
    */
   void UnregisterAllApplications();
 
+  // DEPRECATED
   bool RemoveAppDataFromHMI(ApplicationSharedPtr app);
+
+  // DEPRECATED
   bool LoadAppDataToHMI(ApplicationSharedPtr app);
   bool ActivateApplication(ApplicationSharedPtr app) OVERRIDE;
 
@@ -473,6 +476,7 @@ class ApplicationManagerImpl
   void set_driver_distraction(const bool is_distracting) OVERRIDE;
 
   /*
+   * DEPRECATED
    * @brief Retrieves if VR session has started
    *
    * @return Current VR session state (started, stopped)
@@ -480,6 +484,7 @@ class ApplicationManagerImpl
   inline bool vr_session_started() const;
 
   /*
+   * DEPRECATED
    * @brief Sets VR session state
    *
    * @param state Current HMI VR session state
@@ -1087,6 +1092,7 @@ class ApplicationManagerImpl
   void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) OVERRIDE;
 
   /**
+   * DEPRECATED
    * @brief method adds application in FULL and LIMITED state
    * to on_phone_call_app_list_.
    * Also OnHMIStateNotification with BACKGROUND state sent for these apps
@@ -1094,6 +1100,7 @@ class ApplicationManagerImpl
   void CreatePhoneCallAppList();
 
   /**
+   * DEPRECATED
    * @brief method removes application from on_phone_call_app_list_.
    *
    * Also OnHMIStateNotification with previous HMI state sent for these apps
@@ -1721,6 +1728,7 @@ class ApplicationManagerImpl
   DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 };
 
+// DEPRECATED
 bool ApplicationManagerImpl::vr_session_started() const {
   return is_vr_session_strated_;
 }
