@@ -53,7 +53,7 @@
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/event_engine/event_dispatcher_impl.h"
 #include "application_manager/hmi_interfaces_impl.h"
-#include "application_manager/command_holder_impl.h"
+#include "application_manager/command_holder.h"
 
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
@@ -1721,7 +1721,7 @@ class ApplicationManagerImpl
 
   volatile bool is_stopping_;
 
-  CommandHolderImpl commands_holder_;
+  std::unique_ptr<CommandHolder> commands_holder_;
 
 #ifdef BUILD_TESTS
  public:
