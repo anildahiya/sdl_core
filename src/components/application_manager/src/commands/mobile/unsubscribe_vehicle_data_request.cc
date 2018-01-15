@@ -100,6 +100,7 @@ Subrequest subrequests[] = {
     {hmi_apis::FunctionID::VehicleInfo_UnsubscribeClusterModeStatus,
      strings::cluster_mode_status},
     {hmi_apis::FunctionID::VehicleInfo_UnsubscribeMyKey, strings::my_key},
+    {hmi_apis::FunctionID::VehicleInfo_UnsubscribeTurnSignal, strings::turnSignal},
 };
 }
 #endif  // #ifdef HMI_DBUS_API

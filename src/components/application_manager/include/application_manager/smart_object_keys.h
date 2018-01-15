@@ -257,6 +257,7 @@ extern const char* airbag_status;
 extern const char* emergency_event;
 extern const char* cluster_mode_status;
 extern const char* my_key;
+extern const char* turnSignal;
 extern const char* help_prompt;
 extern const char* scroll_message_body;
 extern const char* data_result;

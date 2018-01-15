@@ -64,7 +64,8 @@ enum VehicleDataType {
   BATTVOLTAGE,
   ENGINETORQUE,
   ACCPEDAL,
-  STEERINGWHEEL
+  STEERINGWHEEL,
+  TURNSIGNAL
 };
 }  //  namespace application_manager
 

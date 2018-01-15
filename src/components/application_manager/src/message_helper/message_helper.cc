@@ -181,6 +181,7 @@ std::pair<std::string, VehicleDataType> kVehicleDataInitializer[] = {
     std::make_pair(strings::emergency_event, EMERGENCYEVENT),
     std::make_pair(strings::cluster_mode_status, CLUSTERMODESTATUS),
     std::make_pair(strings::my_key, MYKEY),
+    std::make_pair(strings::turnSignal, TURNSIGNAL),
     /*
      NOT DEFINED in mobile API
      std::make_pair(strings::gps,
@@ -244,6 +245,7 @@ static VehicleInfo_Requests ivi_subrequests[] = {
     {hmi_apis::FunctionID::VehicleInfo_SubscribeClusterModeStatus,
      strings::cluster_mode_status},
     {hmi_apis::FunctionID::VehicleInfo_SubscribeMyKey, strings::my_key},
+    {hmi_apis::FunctionID::VehicleInfo_SubscribeTurnSignal, strings::turnSignal},
 };
 }
 #endif  // #ifdef HMI_DBUS_API
@@ -633,6 +635,8 @@ const std::map<std::string, uint16_t> create_get_vehicle_data_args() {
                      hmi_apis::FunctionID::VehicleInfo_GetClusterModeStatus));
   rc.insert(std::make_pair(strings::my_key,
                            hmi_apis::FunctionID::VehicleInfo_GetMyKey));
+  rc.insert(std::make_pair(strings::turnSignal,
+                           hmi_apis::FunctionID::VehicleInfo_GetTurnSignal));
   return rc;
 }
 static std::map<std::string, uint16_t> vehicle_data_args =
