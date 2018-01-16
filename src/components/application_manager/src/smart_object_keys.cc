@@ -222,6 +222,7 @@ const char* emergency_event = "emergencyEvent";
 const char* cluster_mode_status = "clusterModeStatus";
 const char* my_key = "myKey";
 const char* turnSignal = "turnSignal";
+const char* electronicParkBrakeStatus = "electronicParkBrakeStatus";
 const char* help_prompt = "helpPrompt";
 const char* scroll_message_body = "scrollableMessageBody";
 const char* data_result = "dataResult";

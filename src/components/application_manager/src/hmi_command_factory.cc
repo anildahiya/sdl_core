@@ -194,6 +194,7 @@
 #include "application_manager/commands/hmi/on_vi_steering_wheel_angle_notification.h"
 #include "application_manager/commands/hmi/on_vi_my_key_notification.h"
 #include "application_manager/commands/hmi/on_vi_turn_signal_notification.h"
+#include "application_manager/commands/hmi/on_vi_electronic_park_brake_status_notification.h"
 #else
 #include "application_manager/commands/hmi/vi_get_vehicle_data_request.h"
 #include "application_manager/commands/hmi/vi_get_vehicle_data_response.h"
@@ -947,6 +948,17 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
                                                       application_manager));
      break;
     }
+    case hmi_apis::FunctionID::VehicleInfo_GetElectronicParkBrakeStatus: {
+      if (is_response)
+        command.reset(new commands::VIGetVehicleDataResponseTemplate<
+          hmi_apis::FunctionID::VehicleInfo_GetElectronicParkBrakeStatus>(message,
+                                                        application_manager));
+      else
+        command.reset(new commands::VIGetVehicleDataRequestTemplate<
+          hmi_apis::FunctionID::VehicleInfo_GetElectronicParkBrakeStatus>(message,
+                                                        application_manager));
+     break;
+    }
     case hmi_apis::FunctionID::VehicleInfo_GetVin: {
       if (is_response)
         command.reset(new commands::VIGetVehicleDataResponseTemplate<
@@ -1491,6 +1503,17 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
           message, application_manager));
       break;
     }
+    case hmi_apis::FunctionID::VehicleInfo_SubscribeElectronicParkBrakeStatus: {
+        if (is_response)
+          command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
+            hmi_apis::FunctionID::VehicleInfo_SubscribeElectronicParkBrakeStatus>(
+            message, application_manager));
+        else
+          command.reset(new commands::VISubscribeVehicleDataRequestTemplate<
+           hmi_apis::FunctionID::VehicleInfo_SubscribeElectronicParkBrakeStatus>(
+           message, application_manager));
+       break;
+    }
     case hmi_apis::FunctionID::VehicleInfo_SubscribeVin: {
       if (is_response)
         command.reset(new commands::VISubscribeVehicleDataResponseTemplate<
@@ -1781,18 +1804,29 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
             message, application_manager));
       break;
     }
-  case hmi_apis::FunctionID::VehicleInfo_UnsubscribeTurnSignal: {
-    if (is_response)
-      command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
-          hmi_apis::FunctionID::VehicleInfo_UnsubscribeTurnSignal>(
-          message, application_manager));
-    else
-      command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
-          hmi_apis::FunctionID::VehicleInfo_UnsubscribeTurnSignal>(
-          message, application_manager));
-    break;
-  }
+    case hmi_apis::FunctionID::VehicleInfo_UnsubscribeTurnSignal: {
+        if (is_response)
+          command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
+              hmi_apis::FunctionID::VehicleInfo_UnsubscribeTurnSignal>(
+              message, application_manager));
+        else
+          command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
+              hmi_apis::FunctionID::VehicleInfo_UnsubscribeTurnSignal>(
+              message, application_manager));
+        break;
+    }
 
+    case hmi_apis::FunctionID::VehicleInfo_UnsubscribeElectronicParkBrakeStatus: {
+       if (is_response)
+          command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
+              hmi_apis::FunctionID::VehicleInfo_UnsubscribeElectronicParkBrakeStatus>(
+              message, application_manager));
+        else
+          command.reset(new commands::VIUnsubscribeVehicleDataRequestTemplate<
+              hmi_apis::FunctionID::VehicleInfo_UnsubscribeElectronicParkBrakeStatus>(
+              message, application_manager));
+        break;
+    }
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeVin: {
       if (is_response)
         command.reset(new commands::VIUnsubscribeVehicleDataResponseTemplate<
@@ -2101,6 +2135,11 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     case hmi_apis::FunctionID::VehicleInfo_OnTurnSignal: {
       command.reset(
          new commands::OnVITurnSignalNotification(message, application_manager));
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_OnElectronicParkBrakeStatus: {
+      command.reset(
+        new commands::OnVIElectronicParkBrakeStatusNotification(message, application_manager));
       break;
     }
 #else

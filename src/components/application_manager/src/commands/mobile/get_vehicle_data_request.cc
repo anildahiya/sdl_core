@@ -118,6 +118,7 @@ Subrequest subrequests[] = {
      str::cluster_mode_status},
     {hmi_apis::FunctionID::VehicleInfo_GetMyKey, str::my_key},
     {hmi_apis::FunctionID::VehicleInfo_GetTurnSignal, str::turnSignal},
+    {hmi_apis::FunctionID::VehicleInfo_GetElectronicParkBrakeStatus, str::electronicParkBrakeStatus},
 };
 }
 

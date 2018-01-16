@@ -379,6 +379,7 @@ set (HMI_COMMANDS_SOURCES_DBUS
   ${COMMANDS_SOURCE_DIR}/hmi/on_vi_steering_wheel_angle_notification.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_vi_my_key_notification.cc
   ${COMMANDS_SOURCE_DIR}/hmi/on_vi_turn_signal_notification.cc
+  ${COMMANDS_SOURCE_DIR}/hmi/on_vi_electronic_park_brake_status_notification.cc
 )
 
 if (${HMI_JSON_API})
