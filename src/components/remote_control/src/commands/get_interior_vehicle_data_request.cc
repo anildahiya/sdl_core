@@ -68,6 +68,11 @@ bool CheckIfModuleTypeExistInCapabilities(
     LOG4CXX_DEBUG(logger_, " Climate control capabilities not present");
     return false;
   }
+  if (enums_value::kSeat == module_type &&
+      !rc_capabilities.keyExists(strings::kseatControlCapabilities)) {
+    LOG4CXX_DEBUG(logger_, " Seat control capabilities not present");
+    return false;
+  }
 
   return true;
 }

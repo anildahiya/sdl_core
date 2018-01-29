@@ -87,6 +87,23 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["radioEnable"] = "radioEnableAvailable";
   mapping["state"] = "stateAvailable";
 
+  //  seat
+  mapping["heatingEnabled"] = "heatingEnabledAvailable";
+  mapping["coolingEnabled"] = "coolingEnabledAvailable";
+  mapping["heatingLevel"] = "heatingLevelAvailable";
+  mapping["coolingLevel"] = "coolingEnabledAvailable";
+  mapping["horizontalPosition"] = "horizontalPositionAvailable";
+  mapping["verticalPosition"] = "verticalPositionAvailable";
+  mapping["frontVerticalPosition"] = "frontVerticalPositionAvailable";
+  mapping["backVerticalPosition"] = "backVerticalPositionAvailable";
+  mapping["backTiltAngle"] = "backTiltAngleAvailable";
+  mapping["headSupportHorizontalPosition"] = "headSupportHorizontalPositionAvailable";
+  mapping["headSupportVerticalPosition"] = "headSupportVerticalPositionAvailable";
+  mapping["massageEnabled"] = "massageEnabledAvailable";
+  mapping["massageMode"] = "massageModeAvailable";
+  mapping["massageCushionFirmness"] = "massageCushionFirmnessAvailable";
+  mapping["memory"] = "memoryAvailable";
+
   return mapping;
 }
 }  // namespace
@@ -140,6 +157,7 @@ bool CheckIfModuleDataExistInCapabilities(
   LOG4CXX_AUTO_TRACE(logger_);
   bool is_radio_data_valid = true;
   bool is_climate_data_valid = true;
+  bool is_seat_data_valid = true;
   if (IsMember(module_data, kRadioControlData)) {
     if (!rc_capabilities.keyExists(strings::kradioControlCapabilities)) {
       LOG4CXX_DEBUG(logger_, " Radio control capabilities not present");
@@ -160,8 +178,18 @@ bool CheckIfModuleDataExistInCapabilities(
     is_climate_data_valid = CheckControlDataByCapabilities(
         climate_caps, module_data[strings::kClimateControlData]);
   }
+  if (IsMember(module_data, kSeatControlData)) {
+    if (!rc_capabilities.keyExists(strings::kseatControlCapabilities)) {
+      LOG4CXX_DEBUG(logger_, " Seat control capabilities not present");
+      return false;
+    }
+    const smart_objects::SmartObject& seat_caps =
+        rc_capabilities[strings::kseatControlCapabilities];
+    is_seat_data_valid = CheckControlDataByCapabilities(
+        seat_caps, module_data[strings::kSeatControlData]);
+  }
 
-  return is_radio_data_valid && is_climate_data_valid;
+  return is_radio_data_valid && is_climate_data_valid && is_seat_data_valid;
 }
 
 void SetInteriorVehicleDataRequest::Execute() {
@@ -270,6 +298,10 @@ void SetInteriorVehicleDataRequest::CutOffReadOnlyParams(
         request_params[message_params::kModuleData]
                       [message_params::kRadioControlData].removeMember(*it);
         LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameter: " << *it);
+      } else if (enums_value::kSeat == module_type) {
+          request_params[message_params::kModuleData]
+                        [message_params::kSeatControlData].removeMember(*it);
+          LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameter: " << *it);
       }
     }
   }
@@ -340,6 +372,11 @@ std::vector<std::string> SetInteriorVehicleDataRequest::ControlData(
   }
   if (module == enums_value::kClimate) {
     params = data.get(message_params::kClimateControlData,
+                      Json::Value(Json::objectValue));
+  }
+
+  if (module == enums_value::kSeat) {
+    params = data.get(message_params::kSeatControlData,
                       Json::Value(Json::objectValue));
   }
   return params.getMemberNames();
