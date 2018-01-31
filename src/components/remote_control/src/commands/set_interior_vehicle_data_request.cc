@@ -74,6 +74,10 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["dualModeEnable"] = "dualModeEnableAvailable";
   mapping["acMaxEnable"] = "acMaxEnableAvailable";
   mapping["ventilationMode"] = "ventilationModeAvailable";
+  mapping["heatedSteeringWheelEnable"] = "heatedSteeringWheelAvailable";
+  mapping["heatedWindshieldEnable"] = "heatedWindshieldAvailable";
+  mapping["heatedRearWindowEnable"] = "heatedRearWindowAvailable";
+  mapping["heatedMirrorsEnable"] = "heatedMirrorsAvailable";
 
   // radio
   mapping["band"] = "radioBandAvailable";
@@ -86,6 +90,7 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["signalChangeThreshold"] = "signalChangeThresholdAvailable";
   mapping["radioEnable"] = "radioEnableAvailable";
   mapping["state"] = "stateAvailable";
+  mapping["sisData"] = "sisDataAvailable";
 
   //  seat
   mapping["heatingEnabled"] = "heatingEnabledAvailable";
@@ -103,6 +108,16 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["massageMode"] = "massageModeAvailable";
   mapping["massageCushionFirmness"] = "massageCushionFirmnessAvailable";
   mapping["memory"] = "memoryAvailable";
+
+  //  Audio
+  mapping["source"] = "sourceAvailable";
+  mapping["volume"] = "volumeAvailable";
+  mapping["equalizerSettings"] = "equalizerAvailable";
+
+  //  Hmi Setting
+  mapping["displayMode"] = "displayModeUnitAvailable";
+  mapping["temperatureUnit"] = "temperatureUnitAvailable";
+  mapping["distanceUnit"] = "distanceUnitAvailable";
 
   return mapping;
 }
@@ -158,6 +173,9 @@ bool CheckIfModuleDataExistInCapabilities(
   bool is_radio_data_valid = true;
   bool is_climate_data_valid = true;
   bool is_seat_data_valid = true;
+  bool is_audio_data_valid = true;
+  bool is_light_data_valid = true;
+  bool is_hmi_setting_data_valid = true;
   if (IsMember(module_data, kRadioControlData)) {
     if (!rc_capabilities.keyExists(strings::kradioControlCapabilities)) {
       LOG4CXX_DEBUG(logger_, " Radio control capabilities not present");
@@ -188,8 +206,38 @@ bool CheckIfModuleDataExistInCapabilities(
     is_seat_data_valid = CheckControlDataByCapabilities(
         seat_caps, module_data[strings::kSeatControlData]);
   }
+  if (IsMember(module_data, kAudioControlData)) {
+    if (!rc_capabilities.keyExists(strings::kaudioControlCapabilities)) {
+      LOG4CXX_DEBUG(logger_, " Audio control capabilities not present");
+      return false;
+    }
+    const smart_objects::SmartObject& audio_caps =
+        rc_capabilities[strings::kaudioControlCapabilities];
+    is_audio_data_valid = CheckControlDataByCapabilities(
+        audio_caps, module_data[strings::kAudioControlData]);
+  }
+  if (IsMember(module_data, kLightControlData)) {
+    if (!rc_capabilities.keyExists(strings::klightControlCapabilities)) {
+      LOG4CXX_DEBUG(logger_, " Light control capabilities not present");
+      return false;
+    }
+    const smart_objects::SmartObject& light_caps =
+        rc_capabilities[strings::klightControlCapabilities];
+    is_light_data_valid = CheckControlDataByCapabilities(
+        light_caps, module_data[strings::kLightControlData]);
+  }
+  if (IsMember(module_data, kHMISettingsControlData)) {
+    if (!rc_capabilities.keyExists(strings::khmiSettingsControlCapabilities)) {
+      LOG4CXX_DEBUG(logger_, " Hmi Setting control capabilities not present");
+      return false;
+    }
+    const smart_objects::SmartObject& hmiSetting_caps =
+        rc_capabilities[strings::khmiSettingsControlCapabilities];
+    is_hmi_setting_data_valid = CheckControlDataByCapabilities(
+        hmiSetting_caps, module_data[strings::kHMISettingsControlData]);
+  }
 
-  return is_radio_data_valid && is_climate_data_valid && is_seat_data_valid;
+  return is_radio_data_valid && is_climate_data_valid && is_seat_data_valid && is_audio_data_valid && is_light_data_valid && is_hmi_setting_data_valid;
 }
 
 void SetInteriorVehicleDataRequest::Execute() {
@@ -379,6 +427,22 @@ std::vector<std::string> SetInteriorVehicleDataRequest::ControlData(
     params = data.get(message_params::kSeatControlData,
                       Json::Value(Json::objectValue));
   }
+
+  if (module == enums_value::kAudio) {
+    params = data.get(message_params::kAudioControlData,
+                      Json::Value(Json::objectValue));
+  }
+
+  if (module == enums_value::kLight) {
+    params = data.get(message_params::kLightControlData,
+                      Json::Value(Json::objectValue));
+  }
+
+  if (module == enums_value::kHmiSettings) {
+    params = data.get(message_params::kHMISettingsControlData,
+                      Json::Value(Json::objectValue));
+  }
+
   return params.getMemberNames();
 }
 

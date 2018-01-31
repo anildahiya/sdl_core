@@ -41,11 +41,17 @@ const char kclimateControlCapabilities[] = "climateControlCapabilities";
 const char kradioControlCapabilities[] = "radioControlCapabilities";
 const char kbuttonCapabilities[] = "buttonCapabilities";
 const char kseatControlCapabilities[] = "seatControlCapabilities";
+const char kaudioControlCapabilities[] = "audioControlCapabilities";
+const char klightControlCapabilities[] = "lightControlCapabilities";
+const char khmiSettingsControlCapabilities[] = "hmiSettingsControlCapabilities";
 // RemoteControlCapabilities constants
 
 const char kRadioControlData[] = "radioControlData";
 const char kClimateControlData[] = "climateControlData";
 const char kSeatControlData[] = "seatControlData";
+const char kAudioControlData[] = "audioControlData";
+const char kLightControlData[] = "lightControlData";
+const char kHMISettingsControlData[] = "hmiSettingsControlData";
 }  //  strings
 
 namespace result_codes {
@@ -158,6 +164,9 @@ const char kVentilationMode[] = "ventilationMode";
 const char kRadioControlData[] = "radioControlData";
 const char kClimateControlData[] = "climateControlData";
 const char kSeatControlData[] = "seatControlData";
+const char kAudioControlData[] = "audioControlData";
+const char kLightControlData[] = "lightControlData";
+const char kHMISettingsControlData[] = "hmiSettingsControlData";
 // ModuleData struct
 
 const char kHMIAppID[] = "appID";
@@ -172,6 +181,9 @@ namespace enums_value {
 const char kClimate[] = "CLIMATE";
 const char kRadio[] = "RADIO";
 const char kSeat[] = "SEAT";
+const char kAudio[] = "AUDIO";
+const char kLight[] = "LIGHT";
+const char kHmiSettings[] = "HMI_SETTINGS";
 // ModuleType enum
 
 // RadioBand enum
