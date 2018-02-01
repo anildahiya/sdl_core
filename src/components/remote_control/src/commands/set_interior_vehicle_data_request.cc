@@ -85,7 +85,7 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["frequencyFraction"] = "radioFrequencyAvailable";
   mapping["rdsData"] = "rdsDataAvailable";
   mapping["availableHDs"] = "availableHDsAvailable";
-  mapping["hdChannel"] = "availableHDsAvailable";
+  mapping["hdChannel"] = "hdChannelAvailable";
   mapping["signalStrength"] = "signalStrengthAvailable";
   mapping["signalChangeThreshold"] = "signalChangeThresholdAvailable";
   mapping["radioEnable"] = "radioEnableAvailable";
@@ -93,10 +93,11 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["sisData"] = "sisDataAvailable";
 
   //  seat
+  mapping["id"] = "heatingEnabledAvailable";
   mapping["heatingEnabled"] = "heatingEnabledAvailable";
   mapping["coolingEnabled"] = "coolingEnabledAvailable";
   mapping["heatingLevel"] = "heatingLevelAvailable";
-  mapping["coolingLevel"] = "coolingEnabledAvailable";
+  mapping["coolingLevel"] = "coolingLevelAvailable";
   mapping["horizontalPosition"] = "horizontalPositionAvailable";
   mapping["verticalPosition"] = "verticalPositionAvailable";
   mapping["frontVerticalPosition"] = "frontVerticalPositionAvailable";
@@ -141,7 +142,7 @@ bool CheckControlDataByCapabilities(
 
   Json::Value::Members::const_iterator it = control_data_keys.begin();
   for (; it != control_data_keys.end(); ++it) {
-    const std::string& request_parameter = *it;
+    const std::string& request_parameter = *it;     
     const std::string& caps_key = mapping[request_parameter];
     const smart_objects::SmartObject& capabilities_status = module_caps[0];
     LOG4CXX_DEBUG(logger_,
@@ -260,8 +261,9 @@ void SetInteriorVehicleDataRequest::Execute() {
   if (module_type_and_data_match) {
     const smart_objects::SmartObject* capabilities =
         service()->GetRCCapabilities();
+
     if (capabilities &&
-        !CheckIfModuleDataExistInCapabilities(*capabilities, module_data)) {
+            !CheckIfModuleDataExistInCapabilities(*capabilities, module_data)) {
       LOG4CXX_WARN(logger_, "Accessing not supported module data");
       SendResponse(false,
                    result_codes::kUnsupportedResource,
