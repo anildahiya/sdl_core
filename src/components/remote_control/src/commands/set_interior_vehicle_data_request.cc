@@ -93,7 +93,6 @@ const std::map<std::string, std::string> GetModuleDataToCapabilitiesMapping() {
   mapping["sisData"] = "sisDataAvailable";
 
   //  seat
-  mapping["id"] = "heatingEnabledAvailable";
   mapping["heatingEnabled"] = "heatingEnabledAvailable";
   mapping["coolingEnabled"] = "coolingEnabledAvailable";
   mapping["heatingLevel"] = "heatingLevelAvailable";

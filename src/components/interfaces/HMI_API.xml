@@ -2084,12 +2084,12 @@
     <element name="AUTO"/>
   </enum>
   <enum name="DistanceUnit">
-      <element name="MILES"/>
-      <element name="KILOMETERS"/>
+      <element name="METRIC"/>
+      <element name="IMPERIAL"/>
   </enum>
 
   <struct name="HMISettingsControlData">
-    <description>Corresponds to "HMI_SETTINGS" ModuleType</description>
+      <description>Corresponds to "HMI_SETTINGS" ModuleType</description>
       <param name="displayMode" type="DisplayMode" mandatory="false"></param>
       <param name="temperatureUnit" type="TemperatureUnit" mandatory="false"></param>
       <param name="distanceUnit" type="DistanceUnit" mandatory="false"></param>
