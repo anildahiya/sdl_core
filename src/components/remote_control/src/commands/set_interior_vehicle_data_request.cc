@@ -144,6 +144,11 @@ bool CheckControlDataByCapabilities(
     const std::string& request_parameter = *it;     
     const std::string& caps_key = mapping[request_parameter];
     const smart_objects::SmartObject& capabilities_status = module_caps[0];
+
+    if(caps_key.empty()){
+        continue;
+    }
+
     LOG4CXX_DEBUG(logger_,
                   "Checking request parameter "
                       << request_parameter
