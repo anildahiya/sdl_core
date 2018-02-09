@@ -139,11 +139,12 @@ bool CheckControlDataByCapabilities(
       GetModuleDataToCapabilitiesMapping();
   Json::Value::Members control_data_keys = control_data.getMemberNames();
 
+  const smart_objects::SmartObject& capabilities_status = ((smart_objects::SmartType::SmartType_Array == module_caps.getType()) ? module_caps[0] : module_caps);
+
   Json::Value::Members::const_iterator it = control_data_keys.begin();
   for (; it != control_data_keys.end(); ++it) {
     const std::string& request_parameter = *it;     
     const std::string& caps_key = mapping[request_parameter];
-    const smart_objects::SmartObject& capabilities_status = module_caps[0];
 
     if(caps_key.empty()){
         continue;

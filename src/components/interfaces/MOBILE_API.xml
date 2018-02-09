@@ -3036,8 +3036,8 @@
     <element name="AUTO"/>
   </enum>
   <enum name="DistanceUnit">
-      <element name="METRIC"/>
-      <element name="IMPERIAL"/>
+      <element name="MILES"/>
+      <element name="KILOMETERS"/>
   </enum>
   
   <struct name="HMISettingsControlData">
