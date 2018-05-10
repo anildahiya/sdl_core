@@ -123,11 +123,13 @@ ApplicationImpl::ApplicationImpl(
     , list_files_in_none_count_(0)
     , mac_address_(mac_address)
     , device_id_(device_id)
+    , secondary_device_id_(0)
     , usage_report_(mobile_app_id, statistics_manager)
     , protocol_version_(
           protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3)
     , is_voice_communication_application_(false)
     , is_resuming_(false)
+    , deferred_resumption_hmi_level_(mobile_api::HMILevel::eType::INVALID_ENUM)
     , is_hash_changed_during_suspend_(false)
     , video_stream_retry_number_(0)
     , audio_stream_retry_number_(0)
@@ -360,6 +362,10 @@ connection_handler::DeviceHandle ApplicationImpl::device() const {
   return device_id_;
 }
 
+connection_handler::DeviceHandle ApplicationImpl::secondary_device() const {
+  return secondary_device_id_;
+}
+
 const std::string& ApplicationImpl::mac_address() const {
   return mac_address_;
 }
@@ -473,6 +479,9 @@ void ApplicationImpl::StopStreamingForce(
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
+  // see the comment in StopStreaming()
+  sync_primitives::AutoLock lock(streaming_stop_lock_);
+
   SuspendStreaming(service_type);
 
   if (service_type == ServiceType::kMobileNav) {
@@ -486,6 +495,12 @@ void ApplicationImpl::StopStreaming(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
+
+  // since WakeUpStreaming() is called from another thread, it is possible that
+  // the stream will be restarted after we call SuspendStreaming() and before
+  // we call StopXxxStreaming(). To avoid such timing issue, make sure that
+  // we run SuspendStreaming() and StopXxxStreaming() atomically.
+  sync_primitives::AutoLock lock(streaming_stop_lock_);
 
   SuspendStreaming(service_type);
 
@@ -523,13 +538,30 @@ void ApplicationImpl::SuspendStreaming(
     application_manager_.OnAppStreaming(app_id(), service_type, false);
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
     video_streaming_suspended_ = true;
+
+    if (video_streaming_approved()) {
+      MessageHelper::SendOnDataStreaming(
+          service_type, false, application_manager_);
+    } else {
+      LOG4CXX_INFO(
+          logger_,
+          "Do not suspend video streaming because already not approved");
+    }
   } else if (ServiceType::kAudio == service_type) {
     audio_stream_suspend_timer_.Stop();
     application_manager_.OnAppStreaming(app_id(), service_type, false);
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     audio_streaming_suspended_ = true;
+
+    if (audio_streaming_approved()) {
+      MessageHelper::SendOnDataStreaming(
+          service_type, false, application_manager_);
+    } else {
+      LOG4CXX_INFO(
+          logger_,
+          "Do not suspend audio streaming because already not approved");
+    }
   }
-  MessageHelper::SendOnDataStreaming(service_type, false, application_manager_);
 }
 
 void ApplicationImpl::WakeUpStreaming(
@@ -537,7 +569,15 @@ void ApplicationImpl::WakeUpStreaming(
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
+  // See the comment in StopStreaming(). Also, please make sure that we acquire
+  // streaming_stop_lock_ then xxx_streaming_suspended_lock_ in this order!
+  sync_primitives::AutoLock lock(streaming_stop_lock_);
+
   if (ServiceType::kMobileNav == service_type) {
+    if (!video_streaming_approved()) {
+      LOG4CXX_INFO(logger_, "Video streaming not approved yet");
+      return;
+    }
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
     if (video_streaming_suspended_) {
       application_manager_.OnAppStreaming(app_id(), service_type, true);
@@ -548,6 +588,10 @@ void ApplicationImpl::WakeUpStreaming(
     video_stream_suspend_timer_.Start(video_stream_suspend_timeout_,
                                       timer::kPeriodic);
   } else if (ServiceType::kAudio == service_type) {
+    if (!audio_streaming_approved()) {
+      LOG4CXX_INFO(logger_, "Audio streaming not approved yet");
+      return;
+    }
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     if (audio_streaming_suspended_) {
       application_manager_.OnAppStreaming(app_id(), service_type, true);
@@ -620,6 +664,11 @@ void ApplicationImpl::set_device(connection_handler::DeviceHandle device) {
   device_id_ = device;
 }
 
+void ApplicationImpl::set_secondary_device(
+    connection_handler::DeviceHandle secondary_device) {
+  secondary_device_id_ = secondary_device;
+}
+
 uint32_t ApplicationImpl::get_grammar_id() const {
   return grammar_id_;
 }
@@ -663,6 +712,16 @@ void ApplicationImpl::set_is_resuming(bool is_resuming) {
 
 bool ApplicationImpl::is_resuming() const {
   return is_resuming_;
+}
+
+void ApplicationImpl::set_deferred_resumption_hmi_level(
+    mobile_api::HMILevel::eType level) {
+  deferred_resumption_hmi_level_ = level;
+}
+
+mobile_api::HMILevel::eType ApplicationImpl::deferred_resumption_hmi_level()
+    const {
+  return deferred_resumption_hmi_level_;
 }
 
 bool ApplicationImpl::AddFile(const AppFile& file) {

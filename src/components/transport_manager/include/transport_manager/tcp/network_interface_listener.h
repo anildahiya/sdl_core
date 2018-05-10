@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2018 Xevo Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -13,7 +13,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the Ford Motor Company nor the names of its contributors
+ * Neither the names of the copyright holders nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -30,45 +30,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_SETTINGS_H_
-#define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_SETTINGS_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_NETWORK_INTERFACE_LISTENER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_NETWORK_INTERFACE_LISTENER_H_
 
-#include "transport_manager/transport_manager_mme_settings.h"
 namespace transport_manager {
-class TransportManagerSettings : public TransportManagerMMESettings {
+namespace transport_adapter {
+
+/**
+ * @brief Listener to detect various events on network interfaces
+ */
+class NetworkInterfaceListener {
  public:
   /**
-   * @brief Returns true if last state singleton is used
+   * @brief Destructor
    */
-  virtual bool use_last_state() const = 0;
+  virtual ~NetworkInterfaceListener() {}
 
   /**
-   * @brief Timeout in transport manager before disconnect
+   * @brief Initialize this listener
    */
-  virtual uint32_t transport_manager_disconnect_timeout() const = 0;
+  virtual bool Init() = 0;
 
   /**
-   * @brief Returns port for TCP transport adapter
+   * @brief Deinitialize this listener
    */
-  virtual uint16_t transport_manager_tcp_adapter_port() const = 0;
+  virtual void Deinit() = 0;
 
   /**
-   * @brief Returns the millisecond count before timeout
-   * for transport change feature occures.
+   * @brief Start this listener
    */
-  virtual uint32_t app_transport_change_timer() const = 0;
+  virtual bool Start() = 0;
 
   /**
-   * @brief Returns the millisecond count as addition to
-   * the transport change timeout value.
+   * @brief Stop this listener
    */
-  virtual uint32_t app_transport_change_timer_addition() const = 0;
-
-  /**
-   * @brief Returns the network interface name for TCP transport adapter
-   */
-  virtual const std::string& transport_manager_tcp_adapter_network_interface()
-      const = 0;
+  virtual bool Stop() = 0;
 };
+
+}  // namespace transport_adapter
 }  // namespace transport_manager
-#endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_SETTINGS_H_
+
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_NETWORK_INTERFACE_LISTENER_H_

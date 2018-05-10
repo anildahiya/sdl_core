@@ -64,6 +64,7 @@ using namespace mobile_apis;
 namespace custom_str = utils::custom_string;
 
 using ::testing::_;
+using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::AtLeast;
@@ -106,6 +107,11 @@ class ApplicationImplTest : public ::testing::Test {
     HmiStatePtr initial_state = CreateTestHmiState();
     app_impl->SetInitialState(initial_state);
   }
+
+  virtual void TearDown() OVERRIDE {
+    Mock::VerifyAndClearExpectations(MockMessageHelper::message_helper_mock());
+  }
+
   HmiStatePtr CreateTestHmiState();
 
   HmiStatePtr TestAddHmiState(HMILevel::eType hmi_lvl,
@@ -731,7 +737,8 @@ TEST_F(ApplicationImplTest, StartStreaming_StreamingApproved) {
   app_impl->StartStreaming(protocol_handler::ServiceType::kAudio);
 }
 
-TEST_F(ApplicationImplTest, SuspendNaviStreaming) {
+TEST_F(ApplicationImplTest, SuspendNaviStreaming_StreamingApproved) {
+  app_impl->set_video_streaming_approved(true);
   protocol_handler::ServiceType type =
       protocol_handler::ServiceType::kMobileNav;
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
@@ -740,7 +747,8 @@ TEST_F(ApplicationImplTest, SuspendNaviStreaming) {
   app_impl->SuspendStreaming(type);
 }
 
-TEST_F(ApplicationImplTest, SuspendAudioStreaming) {
+TEST_F(ApplicationImplTest, SuspendAudioStreaming_StreamingApproved) {
+  app_impl->set_audio_streaming_approved(true);
   protocol_handler::ServiceType type = protocol_handler::ServiceType::kAudio;
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
@@ -748,8 +756,28 @@ TEST_F(ApplicationImplTest, SuspendAudioStreaming) {
   app_impl->SuspendStreaming(type);
 }
 
+TEST_F(ApplicationImplTest, SuspendNaviStreaming_StreamingNotApproved) {
+  app_impl->set_video_streaming_approved(false);
+  protocol_handler::ServiceType type =
+      protocol_handler::ServiceType::kMobileNav;
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              SendOnDataStreaming(type, false, _)).Times(0);
+  app_impl->SuspendStreaming(type);
+}
+
+TEST_F(ApplicationImplTest, SuspendAudioStreaming_StreamingNotApproved) {
+  app_impl->set_audio_streaming_approved(false);
+  protocol_handler::ServiceType type = protocol_handler::ServiceType::kAudio;
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              SendOnDataStreaming(type, false, _)).Times(0);
+  app_impl->SuspendStreaming(type);
+}
+
 // TODO {AKozoriz} : Fix tests with streaming (APPLINK-19289)
-TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpAudioStreaming) {
+TEST_F(ApplicationImplTest, Suspend_WakeUpAudioStreaming_StreamingApproved) {
+  app_impl->set_audio_streaming_approved(true);
   protocol_handler::ServiceType type = protocol_handler::ServiceType::kAudio;
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
@@ -762,7 +790,8 @@ TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpAudioStreaming) {
   app_impl->WakeUpStreaming(type);
 }
 
-TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpNaviStreaming) {
+TEST_F(ApplicationImplTest, Suspend_WakeUpNaviStreaming_StreamingApproved) {
+  app_impl->set_video_streaming_approved(true);
   protocol_handler::ServiceType type =
       protocol_handler::ServiceType::kMobileNav;
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
@@ -773,6 +802,37 @@ TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpNaviStreaming) {
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, true));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendOnDataStreaming(type, true, _));
+  app_impl->WakeUpStreaming(type);
+}
+
+TEST_F(ApplicationImplTest, Suspend_WakeUpAudioStreaming_StreamingNotApproved) {
+  app_impl->set_audio_streaming_approved(false);
+  protocol_handler::ServiceType type = protocol_handler::ServiceType::kAudio;
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              SendOnDataStreaming(type, false, _)).Times(0);
+  app_impl->SuspendStreaming(type);
+
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, true))
+      .Times(0);
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              SendOnDataStreaming(type, true, _)).Times(0);
+  app_impl->WakeUpStreaming(type);
+}
+
+TEST_F(ApplicationImplTest, Suspend_WakeUpNaviStreaming_StreamingNotApproved) {
+  app_impl->set_video_streaming_approved(false);
+  protocol_handler::ServiceType type =
+      protocol_handler::ServiceType::kMobileNav;
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              SendOnDataStreaming(type, false, _)).Times(0);
+  app_impl->SuspendStreaming(type);
+
+  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, true))
+      .Times(0);
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              SendOnDataStreaming(type, true, _)).Times(0);
   app_impl->WakeUpStreaming(type);
 }
 
@@ -825,6 +885,29 @@ TEST_F(ApplicationImplTest, PushPopMobileMessage) {
 
   app_impl->SwapMobileMessageQueue(messages);
   EXPECT_TRUE(messages.empty());
+}
+
+TEST_F(ApplicationImplTest, SetSecondaryDeviceTest) {
+  connection_handler::DeviceHandle initial_device =
+      app_impl->secondary_device();
+  EXPECT_EQ(0u, initial_device);
+
+  connection_handler::DeviceHandle device = 123;
+  app_impl->set_secondary_device(device);
+
+  EXPECT_EQ(device, app_impl->secondary_device());
+}
+
+TEST_F(ApplicationImplTest, SetDeferredResumptionHMILevelTest) {
+  using namespace mobile_api::HMILevel;
+  HMILevel::eType initial_deferred_level =
+      app_impl->deferred_resumption_hmi_level();
+  EXPECT_EQ(HMILevel::eType::INVALID_ENUM, initial_deferred_level);
+
+  HMILevel::eType deferred_level = HMILevel::eType::HMI_FULL;
+  app_impl->set_deferred_resumption_hmi_level(deferred_level);
+
+  EXPECT_EQ(deferred_level, app_impl->deferred_resumption_hmi_level());
 }
 
 }  // namespace application_manager_test

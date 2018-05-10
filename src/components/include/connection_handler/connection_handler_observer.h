@@ -140,6 +140,7 @@ class ConnectionHandlerObserver {
    */
   virtual void OnDeviceSwitchingFinish(const std::string& device_uid) = 0;
 
+#ifdef ENABLE_SECURITY
   /**
    * @brief Check if application with specified app_id has NAVIGATION HMI type
    * @param app_id id of application to check
@@ -147,7 +148,6 @@ class ConnectionHandlerObserver {
    */
   virtual bool CheckAppIsNavi(const uint32_t app_id) const = 0;
 
-#ifdef ENABLE_SECURITY
   /**
    * @brief Get unique handshake context by application id
    * @param key id of application
@@ -157,6 +157,23 @@ class ConnectionHandlerObserver {
   virtual security_manager::SSLContext::HandshakeContext GetHandshakeContext(
       uint32_t key) const = 0;
 #endif  // ENABLE_SECURITY
+
+  /**
+   * \brief Called when secondary transport for a particular app is started.
+   * \param device_handle Device identifier on which the secondary transport is
+   * started.
+   * \param session_key session ID representing the app
+   */
+  virtual void OnSecondaryTransportStartedCallback(
+      const connection_handler::DeviceHandle device_handle,
+      const int32_t session_key) = 0;
+
+  /**
+   * \brief Called when secondary transport for a particular app is terminated.
+   * \param session_key session ID representing the app
+   */
+  virtual void OnSecondaryTransportEndedCallback(const int32_t session_key) = 0;
+
  protected:
   /**
    * \brief Destructor

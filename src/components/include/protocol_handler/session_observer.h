@@ -59,27 +59,35 @@ enum { HASH_ID_NOT_SUPPORTED = 0, HASH_ID_WRONG = 0xFFFF0000 };
  * @brief Struct with data containing attributes of starting session
  **/
 struct SessionContext {
+  transport_manager::ConnectionUID primary_connection_id_;
   transport_manager::ConnectionUID connection_id_;
   uint8_t initial_session_id_;
   uint8_t new_session_id_;
   protocol_handler::ServiceType service_type_;
   uint32_t hash_id_;
   bool is_protected_;
+#ifdef ENABLE_SECURITY
   bool is_new_service_;
   bool is_ptu_required_;
+#endif  // ENABLE_SECURITY
 
   /**
    * @brief Constructor
    */
   SessionContext()
-      : connection_id_(0)
+      : primary_connection_id_(0)
+      , connection_id_(0)
       , initial_session_id_(0)
       , new_session_id_(0)
       , service_type_(protocol_handler::kInvalidServiceType)
       , hash_id_(0)
       , is_protected_(false)
+#ifdef ENABLE_SECURITY
       , is_new_service_(false)
-      , is_ptu_required_(false) {}
+      , is_ptu_required_(false)
+#endif  // ENABLE_SECURITY
+  {
+  }
 
   /**
    * @brief Constructor
@@ -93,20 +101,60 @@ struct SessionContext {
    * @param is_protected Whether service will be protected
    * @param is_new_service Whether service was already established
    **/
-  SessionContext(transport_manager::ConnectionUID connection_id,
-                 uint8_t session_id,
-                 uint8_t new_session_id,
-                 protocol_handler::ServiceType service_type,
-                 uint32_t hash_id,
-                 const bool is_protected)
-      : connection_id_(connection_id)
+  DEPRECATED SessionContext(transport_manager::ConnectionUID connection_id,
+                            uint8_t session_id,
+                            uint8_t new_session_id,
+                            protocol_handler::ServiceType service_type,
+                            uint32_t hash_id,
+                            const bool is_protected)
+      : primary_connection_id_(connection_id)
+      , connection_id_(connection_id)
       , initial_session_id_(session_id)
       , new_session_id_(new_session_id)
       , service_type_(service_type)
       , hash_id_(hash_id)
       , is_protected_(is_protected)
+#ifdef ENABLE_SECURITY
       , is_new_service_(false)
-      , is_ptu_required_(false) {}
+      , is_ptu_required_(false)
+#endif  // ENABLE_SECURITY
+  {
+  }
+
+  /**
+   * @brief Constructor
+   * @param primary_connection_id Connection identifier of the primary
+   * connection in which the session is started
+   * @param connection_id_ Connection identifier within which session is
+   * started.
+   * @param session_id Session ID specified to OnSessionStartedCallback()
+   * @param new_session_id Session ID generated
+   * @param service_type Type of service
+   * @param hash_id Hash ID generated from connection_handle and
+   * new_session_id
+   * @param is_protected Whether service will be protected
+   * @param is_new_service Whether service was already established
+   **/
+  SessionContext(transport_manager::ConnectionUID primary_connection_id,
+                 transport_manager::ConnectionUID connection_id,
+                 uint8_t session_id,
+                 uint8_t new_session_id,
+                 protocol_handler::ServiceType service_type,
+                 uint32_t hash_id,
+                 const bool is_protected)
+      : primary_connection_id_(primary_connection_id)
+      , connection_id_(connection_id)
+      , initial_session_id_(session_id)
+      , new_session_id_(new_session_id)
+      , service_type_(service_type)
+      , hash_id_(hash_id)
+      , is_protected_(is_protected)
+#ifdef ENABLE_SECURITY
+      , is_new_service_(false)
+      , is_ptu_required_(false)
+#endif  // ENABLE_SECURITY
+  {
+  }
 };
 
 /**
@@ -208,6 +256,24 @@ class SessionObserver {
   virtual void OnMalformedMessageCallback(const uint32_t& connection_key) = 0;
 
   /**
+   * @brief Converts connection handle to transport type string used in
+   * smartDeviceLink.ini file, e.g. "TCP_WIFI"
+   * @param connection_handle A connection identifier
+   * @return string representation of the transport of the device
+   */
+  virtual const std::string TransportTypeProfileStringFromConnHandle(
+      transport_manager::ConnectionUID connection_handle) const = 0;
+
+  /**
+   * @brief Converts device handle to transport type string used in
+   * smartDeviceLink.ini file, e.g. "TCP_WIFI"
+   * @param device_handle A device handle
+   * @return string representation of the transport of the device
+   */
+  virtual const std::string TransportTypeProfileStringFromDeviceHandle(
+      transport_manager::DeviceHandle device_handle) const = 0;
+
+  /**
    * \brief Creates unique identifier of session (can be used as hash)
    * from given connection identifier
    * within which session exists and session number.
@@ -230,6 +296,7 @@ class SessionObserver {
                            transport_manager::ConnectionUID* connection_handle,
                            uint8_t* sessionId) const = 0;
 
+#if __SIZEOF_SIZE_T__ != 4
   /**
    * DEPRECATED
    * \brief information about given Connection Key.
@@ -243,6 +310,7 @@ class SessionObserver {
                                       uint32_t* app_id,
                                       std::list<int32_t>* sessions_list,
                                       uint32_t* device_id) const = 0;
+#endif
 
   /**
    * \brief information about given Connection Key.
