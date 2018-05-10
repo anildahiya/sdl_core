@@ -229,14 +229,6 @@ CryptoManagerImpl::SSLContextImpl::CheckCertContext() {
   const std::string& cn = GetTextBy(subj_name, NID_commonName);
   const std::string& sn = GetTextBy(subj_name, NID_serialNumber);
 
-  if (!(hsh_context_.expected_cn.CompareIgnoreCase(cn.c_str()))) {
-    LOG4CXX_ERROR(logger_,
-                  "Trying to run handshake with wrong app name: "
-                      << cn << ". Expected app name: "
-                      << hsh_context_.expected_cn.AsMBString());
-    return Handshake_Result_AppNameMismatch;
-  }
-
   if (!(hsh_context_.expected_sn.CompareIgnoreCase(sn.c_str()))) {
     LOG4CXX_ERROR(logger_,
                   "Trying to run handshake with wrong app id: "
